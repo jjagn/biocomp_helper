@@ -14,6 +14,7 @@ class Device:
 
 def main():
     # Load the spreadsheet into a DataFrame
+    print("Reading spreadsheet. This can take a little while")
     df = pd.read_excel("H:\Development\Bioengineer projects\Biocompatibility\Biocompatibility Track Sheet.xlsx")
 
     # Initialize a list to store device structs
@@ -52,12 +53,17 @@ def main():
         materials_set |= device.materials
         methods_set |= device.methods
 
-    print(materials_set)
-    print(methods_set)
+    # print(f"Materials detected: \n")
+    # print(f"Methods detected: \n {methods_set}")
+
+    # print("\n")
 
     # Create a tkinter GUI for user input
     window = tk.Tk()
     window.title("Select Materials and Methods")
+
+    window.minsize(width=800, height=300)
+    window.maxsize(width=800, height=1000)
 
     selected_materials = set()
     selected_methods = set()
@@ -66,123 +72,159 @@ def main():
     frame1 = tk.Frame(window)
     frame2 = tk.Frame(window)
 
-    frame1.pack(side=tk.LEFT, padx=10, expand=True, fill="both")
-    frame2.pack(side=tk.RIGHT, padx=10, expand=True, fill="both")
+    # frame1.grid(row=0, column=0, padx=10, sticky='ns')
+    # frame2.grid(row=0, column=1, padx=10, sticky='ns')
+
+    frame1.pack(side=tk.LEFT, padx=10, expand=False, fill="both")
+    frame2.pack(side=tk.LEFT, padx=10, expand=False, fill="both")
+    # frame3.pack(side=tk.LEFT, padx=10, expand=True, fill="both")
 
     frame_height = 500
     frame_width = 800
 
-    canvas1 = tk.Canvas(frame1)
-    canvas2 = tk.Canvas(frame2)
+    canvas1 = tk.Canvas(frame1, width=180)
+    canvas2 = tk.Canvas(frame2, width=300)
 
-    canvas1.pack(expand=True, side=tk.LEFT, pady=10, fill="both")
-    canvas2.pack(expand=True, side=tk.LEFT, pady=10, fill="both")
+    canvas1.pack(expand=False, side=tk.LEFT, pady=10, fill="both")
+    canvas2.pack(expand=False, side=tk.LEFT, pady=10, fill="both")
+
+    # canvas1.grid(row=0, column=0, sticky='ns')
+    # canvas2.grid(row=0, column=0, sticky='ns')
 
     scrollbar1 = tk.Scrollbar(frame1, orient="vertical", command=canvas1.yview)
     scrollbar2 = tk.Scrollbar(frame2, orient="vertical", command=canvas2.yview)
 
-    scrollbar1.pack(side=tk.RIGHT, fill="y", pady=10, expand=True)
-    scrollbar2.pack(side=tk.RIGHT, fill="y", pady=10, expand=True)
+    scrollbar1.pack(side=tk.LEFT, fill="y", pady=10, expand=False)
+    scrollbar2.pack(side=tk.LEFT, fill="y", pady=10, expand=False)
+
+    # scrollbar1.grid(row=0, column=1, sticky='ns')
+    # scrollbar2.grid(row=0, column=1, sticky='ns')
 
     canvas1.config(yscrollcommand=scrollbar1.set)
     canvas2.config(yscrollcommand=scrollbar2.set)
 
-    frame_on_canvas1 = tk.Frame(canvas1)
+    frame_on_canvas1 = tk.Frame(canvas1, width=100)
     canvas1.create_window(0, 0, window=frame_on_canvas1, anchor='nw')
 
-    frame_on_canvas2 = tk.Frame(canvas2)
+    frame_on_canvas2 = tk.Frame(canvas2, width=100)
     canvas2.create_window(0, 0, window=frame_on_canvas2, anchor='nw')
-
-    method_boxes = []
-    methods_list = []
-    for method in methods_set:
-        methods_list.append(method)
-    
-    for method in sorted(methods_list):
-        var = BooleanVar()
-        var.set(False)
-        checkbox = tk.Checkbutton(frame_on_canvas1, text=method, variable=var)
-        checkbox.pack(anchor="w")
-        method_boxes.append(var)
 
     material_boxes = []
     materials_list = []
     for material in materials_set:
         materials_list.append(material)
 
+    print_bold("Materials detected:")
     for material in sorted(materials_list):
         var = BooleanVar()
         var.set(False)
-        checkbox = tk.Checkbutton(frame_on_canvas2, text=material, variable=var)
+        checkbox = tk.Checkbutton(frame_on_canvas1, text=material, variable=var)
         checkbox.pack(anchor="w")
-        material_boxes.append(var) 
+        material_boxes.append(var)
+        print(material)
+    print("")
+
+    method_boxes = []
+    methods_list = []
+    for method in methods_set:
+        methods_list.append(method)
+    
+    print_bold("Methods detected:")
+    for method in sorted(methods_list):
+        var = BooleanVar()
+        var.set(False)
+        checkbox = tk.Checkbutton(frame_on_canvas2, text=method, variable=var)
+        checkbox.pack(anchor="w")
+        method_boxes.append(var)
+        print(method)
+    print("")
 
     frame_on_canvas1.bind("<Configure>", lambda e: canvas1.configure(scrollregion=canvas1.bbox("all")))
     frame_on_canvas2.bind("<Configure>", lambda e: canvas2.configure(scrollregion=canvas2.bbox("all")))
 
-    # Create a label to display the selected items
-    result_text = tk.Label(window, text="Selected Items: ")
-    result_text.pack()
+    # # Create a label to display the selected items
+    # result_text = tk.Label(window, text="Selected Items: ")
+    # # result_text.pack(padx=50, expand=False)
+    # result_text.grid(row=1, columnspan=2, padx=(10), sticky='w')
+
+    # result_text.grid_columnconfigure(0, minsize=200)
 
     def update_selection():
         # selected_methods = set()
         selected_methods.clear()
-        for checkbox, item in zip(method_boxes, methods_set):
-            # print(f"{checkbox}, {item}\n")
+        for checkbox, item in zip(method_boxes, sorted(methods_list)):
+            print(f"{checkbox}, {item}\n")
             if checkbox.get() == 1:
                 # print(f"item {item} selected")
                 selected_methods.add(item)
-                print(selected_methods)
-        result_text.config(text="Selected Items: " + ", ".join(selected_methods))
+                # print(selected_methods)
+        # result_text.config(text="Selected Items: " + ", ".join(selected_methods))
 
         selected_materials.clear()
-        for checkbox, item in zip(material_boxes, materials_set):
+        for checkbox, item in zip(material_boxes, sorted(materials_list)):
             # print(f"{checkbox}, {item}\n")
             if checkbox.get() == 1:
                 selected_materials.add(item)
-        result_text.config(text="Selected Items: " + ", ".join(selected_materials))
+        # result_text.config(text="Selected Items: " + ", ".join([selected_methods, selected_materials]))
 
-    # Create a button to update the result
-    update_button = tk.Button(window, text="Update Selection", command=update_selection)
-    update_button.pack()
+    # # Create a button to update the result
+    # update_button = tk.Button(window, text="Update Selection", command=update_selection)
+    # # update_button.pack()
+    # update_button.grid(row=2, columnspan=2, padx=(50, 10), sticky='w')
+    # update_button.grid_columnconfigure(0, minsize=200)
 
     def process_selection():
         update_selection()
-        print(selected_materials)
-        print(selected_methods)
+        # print(selected_materials)
+        # print(selected_methods)
         demo_set = selected_materials | selected_methods
 
-        for item in demo_set:
-            print(item)
+        # for item in demo_set:
+        #     print(item)
 
-        print(f"Required items to be covered:\n")
-
-        print(f"Materials: \n")
+        print("=================================================")
+        print_bold("Selected Materials:")
         for item in selected_materials:
             print(f"{item}")
+        print("")
 
-        print(f"Methods: \n")
+        print_bold("Selected Methods:")
         for item in selected_methods:
             print(f"{item}")
+        print("")
+        print("=================================================")
 
         smallest_device_set = find_smallest_cover(devices, demo_set)
 
         if len(smallest_device_set) > 0:
             print(f"Smallest set of devices that covers all required items, {len(smallest_device_set)} total:")
-            print("\n")
             for index, device in enumerate(smallest_device_set):
-                print(f"Device {index+1} of {len(smallest_device_set)}")
+                print_bold(f"Device {index+1} of {len(smallest_device_set)}")
                 print("Description:", device.description)
                 print("Catalogue Code:", device.catalogue_code)
-                print("Contact Characterization:", device.contact_characterization)
-                print("Materials:\n", device.materials)
-                print("Methods:\n", device.methods)
-                print("\n")
+                print("Contact Characterization:", device.contact_characterization, "\n")
+                print("Materials:")
+                for material in device.materials:
+                    if set(material).issubset(selected_materials):
+                        print_bold(material)
+                    else:
+                        print(material)
+
+                print("")
+
+                print("Methods:")
+                for method in device.methods:
+                    if set(method).issubset(selected_methods):
+                        print_bold(method)
+                    print(method)
+                print("=================================================")
         else:
             print("No set that covers all the provided items was found")
 
     calculate_button = tk.Button(window, text="Find Devices", command=process_selection)
-    calculate_button.pack()
+    calculate_button.pack(side=tk.LEFT, padx=50, pady=50)
+    # calculate_button.grid(row=3, columnspan=2, padx=(50, 10), pady=(50), sticky='w')
+    # calculate_button.grid_columnconfigure(0, minsize=200)
 
     frame_on_canvas1.update_idletasks()
     canvas1.config(scrollregion=canvas1.bbox('all'))
@@ -307,6 +349,7 @@ def find_smallest_cover(devices, target_set):
 
     return list(min_cover) if min_cover else []
 
-
+def print_bold(to_print):
+    print(f"\033[1m{to_print}\033[0m")
 
 main()
