@@ -3,6 +3,7 @@ from itertools import combinations
 import tkinter as tk
 from tkinter import Label, Button, BooleanVar, Frame, Canvas
 from tkinter.ttk import Checkbutton, Scrollbar
+import os
 # Define a struct for the device
 class Device:
     def __init__(self, description, catalogue_code, contact_characterization, materials, methods):
@@ -14,8 +15,9 @@ class Device:
 
 def main():
     # Load the spreadsheet into a DataFrame
+    spreadsheet_path = input("please input path to biocomp track sheet").replace("'", "").replace('"', '')
     print("Reading spreadsheet. This can take a little while")
-    df = pd.read_excel("H:\Development\_Development Data\Bioengineer projects\Biocompatibility\Biocompatibility Track Sheet.xlsx")
+    df = pd.read_excel(spreadsheet_path)
 
     # Initialize a list to store device structs
     devices = []
